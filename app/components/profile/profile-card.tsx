@@ -14,7 +14,7 @@ import { PERMISSIONS } from "@/lib/permissions"
 import { WebsiteConfigPanel } from "./website-config-panel"
 import { ApiKeyPanel } from "./api-key-panel"
 import { ActivationCodePanel } from "./activation-code-panel"
-import { StudentManagementPanel } from "./student-management-panel"
+import { UserManagementPanel } from "./user-management-panel"
 
 interface ProfileCardProps {
   user: User
@@ -104,7 +104,7 @@ export function ProfileCard({ user }: ProfileCardProps) {
       {canManageConfig && <WebsiteConfigPanel />}
       {canManageConfig && <EmailServiceConfig />}
       {canManageConfig && <ActivationCodePanel />}
-      {canManageStudents && <StudentManagementPanel />}
+      {canManageStudents && <UserManagementPanel />}
       {canPromote && <PromotePanel />}
       {canManageWebhook && <ApiKeyPanel />}
 

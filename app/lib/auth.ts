@@ -26,11 +26,12 @@ const getDefaultRole = async (): Promise<Role> => {
   if (
     defaultRole === ROLES.DUKE ||
     defaultRole === ROLES.KNIGHT ||
+    defaultRole === ROLES.STUDENT ||
     defaultRole === ROLES.CIVILIAN
   ) {
     return defaultRole as Role
   }
-  
+
   return ROLES.CIVILIAN
 }
 

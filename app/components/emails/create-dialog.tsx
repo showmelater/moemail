@@ -94,14 +94,9 @@ export function CreateDialog({ onEmailCreated }: CreateDialogProps) {
     }
   }, [config])
 
-  // 如果没有创建邮箱权限，显示禁用状态的按钮
+  // 如果没有创建邮箱权限，不显示按钮
   if (!canCreateEmail) {
-    return (
-      <Button disabled className="gap-2" title="学生用户无法创建新邮箱">
-        <Plus className="w-4 h-4" />
-        创建新邮箱
-      </Button>
-    )
+    return null
   }
 
   return (
