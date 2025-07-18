@@ -92,6 +92,7 @@ export function WebsiteConfigPanel() {
             <SelectContent>
               <SelectItem value={ROLES.DUKE}>公爵</SelectItem>
               <SelectItem value={ROLES.KNIGHT}>骑士</SelectItem>
+              <SelectItem value={ROLES.STUDENT}>学生</SelectItem>
               <SelectItem value={ROLES.CIVILIAN}>平民</SelectItem>
             </SelectContent>
           </Select>

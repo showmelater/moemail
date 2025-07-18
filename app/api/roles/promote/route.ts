@@ -50,6 +50,7 @@ export async function POST(request: Request) {
       const description = {
         [ROLES.DUKE]: "超级用户",
         [ROLES.KNIGHT]: "高级用户",
+        [ROLES.STUDENT]: "学生用户",
         [ROLES.CIVILIAN]: "普通用户",
       }[roleName];
 

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users, Search, Loader2, UserCheck, UserX, Mail, Plus, Crown, Gem, Sword, GraduationCap, User2 } from "lucide-react"
+import { Users, Search, Loader2, UserCheck, UserX, Mail, Plus, Crown, Gem, Sword, GraduationCap, User2, Trash2 } from "lucide-react"
 import { useToast } from "@/components/ui/use-toast"
 import {
   Select,
@@ -137,6 +137,7 @@ export function UserManagementPanel() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [showAddEmailDialog, setShowAddEmailDialog] = useState(false)
   const [showUserEmailsDialog, setShowUserEmailsDialog] = useState(false)
+  const [showDeleteUserDialog, setShowDeleteUserDialog] = useState(false)
   const [userEmails, setUserEmails] = useState<User['emails']>([])
   const [addEmailForm, setAddEmailForm] = useState<AddEmailForm>({
     isPermanent: false,
@@ -293,6 +294,50 @@ export function UserManagementPanel() {
       toast({
         title: "删除失败",
         description: error instanceof Error ? error.message : "删除邮箱失败",
+        variant: "destructive"
+      })
+    } finally {
+      setActionLoading(false)
+    }
+  }
+
+  const handleDeleteUser = async () => {
+    if (!selectedUser) return
+
+    setActionLoading(true)
+    try {
+      const response = await fetch(`/api/admin/users/${selectedUser.id}`, {
+        method: 'DELETE'
+      })
+
+      if (!response.ok) throw new Error("删除用户失败")
+
+      const data = await response.json() as {
+        success: boolean
+        message: string
+        deletedData: {
+          emails: number
+          apiKeys: number
+          activationCodes: number
+          userRoles: number
+        }
+      }
+
+      toast({
+        title: "删除成功",
+        description: `${data.message}（删除了 ${data.deletedData.emails} 个邮箱、${data.deletedData.apiKeys} 个API密钥）`
+      })
+
+      // 关闭对话框并重置状态
+      setShowDeleteUserDialog(false)
+      setSelectedUser(null)
+
+      // 刷新用户列表
+      fetchUsers()
+    } catch (error) {
+      toast({
+        title: "删除失败",
+        description: error instanceof Error ? error.message : "删除用户失败",
         variant: "destructive"
       })
     } finally {
@@ -467,6 +512,19 @@ export function UserManagementPanel() {
                         </>
                       )}
                     </Button>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedUser(user)
+                        setShowDeleteUserDialog(true)
+                      }}
+                      disabled={actionLoading || user.primaryRole === 'emperor'}
+                      className="gap-1"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      删除
+                    </Button>
                   </div>
                 </div>
               )
@@ -499,12 +557,18 @@ export function UserManagementPanel() {
                 <Label htmlFor="customAddress">自定义地址（可选）</Label>
                 <Input
                   id="customAddress"
-                  placeholder="留空自动生成随机地址"
+                  placeholder="留空自动生成随机地址（只能包含字母、数字、下划线、连字符）"
                   value={addEmailForm.customAddress}
-                  onChange={(e) =>
-                    setAddEmailForm(prev => ({ ...prev, customAddress: e.target.value }))
-                  }
+                  onChange={(e) => {
+                    // 只允许字母、数字、下划线、连字符
+                    const value = e.target.value.replace(/[^a-zA-Z0-9_-]/g, '')
+                    setAddEmailForm(prev => ({ ...prev, customAddress: value }))
+                  }}
+                  maxLength={30}
                 />
+                {addEmailForm.customAddress && addEmailForm.customAddress.length < 2 && (
+                  <p className="text-sm text-red-600">邮箱前缀至少需要2个字符</p>
+                )}
               </div>
 
               {!addEmailForm.isPermanent && (
@@ -621,6 +685,54 @@ export function UserManagementPanel() {
                 onClick={() => setShowUserEmailsDialog(false)}
               >
                 关闭
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* 删除用户确认对话框 */}
+        <Dialog open={showDeleteUserDialog} onOpenChange={setShowDeleteUserDialog}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="text-red-600">确认删除用户</DialogTitle>
+              <DialogDescription>
+                您即将删除用户 <strong>{selectedUser?.username}</strong>，此操作将：
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+                <h4 className="font-medium text-red-800 mb-2">⚠️ 警告：此操作不可撤销</h4>
+                <ul className="text-sm text-red-700 space-y-1">
+                  <li>• 永久删除用户账号</li>
+                  <li>• 删除用户的所有邮箱地址（{selectedUser?.emailCount || 0} 个）</li>
+                  <li>• 删除用户的所有API密钥</li>
+                  <li>• 删除用户的激活码</li>
+                  <li>• 删除用户的角色分配</li>
+                </ul>
+              </div>
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <p className="text-sm text-gray-600">
+                  用户信息：{selectedUser?.username}
+                  {selectedUser?.name && ` (${selectedUser.name})`}
+                  - {roleNames[selectedUser?.primaryRole as keyof typeof roleNames]}
+                </p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShowDeleteUserDialog(false)}
+                disabled={actionLoading}
+              >
+                取消
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDeleteUser}
+                disabled={actionLoading}
+              >
+                {actionLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                确认删除
               </Button>
             </DialogFooter>
           </DialogContent>

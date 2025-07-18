@@ -98,14 +98,31 @@ export async function POST(
     // 生成邮箱地址
     let emailAddress: string
     if (customAddress) {
+      // 验证自定义前缀的合法性（只允许字母、数字、下划线、连字符）
+      const prefixRegex = /^[a-zA-Z0-9_-]+$/
+      if (!prefixRegex.test(customAddress)) {
+        return NextResponse.json(
+          { error: "邮箱前缀只能包含字母、数字、下划线和连字符" },
+          { status: 400 }
+        )
+      }
+
+      // 检查前缀长度
+      if (customAddress.length < 2 || customAddress.length > 30) {
+        return NextResponse.json(
+          { error: "邮箱前缀长度必须在2-30个字符之间" },
+          { status: 400 }
+        )
+      }
+
       // 使用自定义地址
-      emailAddress = `${customAddress}@${domain}`
-      
+      emailAddress = `${customAddress.toLowerCase()}@${domain}`
+
       // 检查地址是否已被使用
       const existingEmail = await db.query.emails.findFirst({
-        where: eq(emails.address, emailAddress.toLowerCase())
+        where: eq(emails.address, emailAddress)
       })
-      
+
       if (existingEmail) {
         return NextResponse.json(
           { error: "该邮箱地址已被使用" },

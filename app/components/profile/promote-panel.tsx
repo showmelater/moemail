@@ -141,6 +141,12 @@ export function PromotePanel() {
                   骑士
                 </div>
               </SelectItem>
+              <SelectItem value={ROLES.STUDENT}>
+                <div className="flex items-center gap-2">
+                  <GraduationCap className="w-4 h-4" />
+                  学生
+                </div>
+              </SelectItem>
               <SelectItem value={ROLES.CIVILIAN}>
                 <div className="flex items-center gap-2">
                   <User2 className="w-4 h-4" />

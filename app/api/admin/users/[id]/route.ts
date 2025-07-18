@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
 import { createDb } from "@/lib/db"
-import { users } from "@/lib/schema"
+import { users, emails, apiKeys, activationCodes, userRoles } from "@/lib/schema"
 import { eq } from "drizzle-orm"
 import { checkPermission } from "@/lib/auth"
 import { PERMISSIONS } from "@/lib/permissions"
@@ -186,6 +186,101 @@ export async function GET(
     console.error('Failed to get user details:', error)
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "获取用户详情失败" },
+      { status: 500 }
+    )
+  }
+}
+
+// DELETE - 删除用户及其相关数据
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  // 权限检查：只有皇帝可以删除用户
+  const hasPermission = await checkPermission(PERMISSIONS.MANAGE_STUDENTS)
+  if (!hasPermission) {
+    return NextResponse.json(
+      { error: "权限不足" },
+      { status: 403 }
+    )
+  }
+
+  try {
+    const { id } = await params
+    const db = createDb()
+
+    // 查找目标用户
+    const targetUser = await db.query.users.findFirst({
+      where: eq(users.id, id),
+      with: {
+        userRoles: {
+          with: {
+            role: true
+          }
+        },
+        emails: true,
+        apiKeys: true,
+        activationCodes: true
+      }
+    })
+
+    if (!targetUser) {
+      return NextResponse.json(
+        { error: "用户不存在" },
+        { status: 404 }
+      )
+    }
+
+    // 防止删除皇帝账号
+    const isEmperor = targetUser.userRoles.some(ur => ur.role.name === 'emperor')
+    if (isEmperor) {
+      return NextResponse.json(
+        { error: "不能删除皇帝账号" },
+        { status: 400 }
+      )
+    }
+
+    // 开始事务删除用户及其相关数据
+    await db.transaction(async (tx) => {
+      // 删除用户的邮箱
+      if (targetUser.emails.length > 0) {
+        await tx.delete(emails).where(eq(emails.userId, id))
+      }
+
+      // 删除用户的API密钥
+      if (targetUser.apiKeys.length > 0) {
+        await tx.delete(apiKeys).where(eq(apiKeys.userId, id))
+      }
+
+      // 删除用户的激活码
+      if (targetUser.activationCodes.length > 0) {
+        await tx.delete(activationCodes).where(eq(activationCodes.usedByUserId, id))
+      }
+
+      // 删除用户角色关联
+      if (targetUser.userRoles.length > 0) {
+        await tx.delete(userRoles).where(eq(userRoles.userId, id))
+      }
+
+      // 最后删除用户本身
+      await tx.delete(users).where(eq(users.id, id))
+    })
+
+    return NextResponse.json({
+      success: true,
+      message: `用户 ${targetUser.username} 及其相关数据已成功删除`,
+      deletedData: {
+        emails: targetUser.emails.length,
+        apiKeys: targetUser.apiKeys.length,
+        activationCodes: targetUser.activationCodes.length,
+        userRoles: targetUser.userRoles.length
+      }
+    })
+
+  } catch (error) {
+    console.error('Failed to delete user:', error)
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "删除用户失败" },
       { status: 500 }
     )
   }
