@@ -51,3 +51,9 @@ public/sw.js
 wrangler.json
 wrangler.cleanup.json
 wrangler.email.json
+
+# Development and testing files
+.issues/
+.idea/
+scripts/generate-test-data.ts
+scripts/webhook-test-server.ts

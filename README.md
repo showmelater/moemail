@@ -125,10 +125,7 @@ pnpm dev:cleanup
 pnpm test:cleanup
 ```
 
-4. 生成 Mock 数据（邮箱以及邮件消息）
-```bash
-pnpm generate-test-data
-```
+
 ## 部署
 
 ### 视频版保姆级部署教程
@@ -386,15 +383,7 @@ X-Webhook-Event: new_message
 
 ### 测试
 
-项目提供了一个简单的测试服务器, 可以通过如下命令运行:
-
-```bash
-pnpm webhook-test-server
-```
-
-测试服务器会在本地启动一个 HTTP 服务器，监听 3001 端口（http://localhost:3001）, 并打印收到的 Webhook 消息详情。
-
-如果需要进行外网测试，可以通过 Cloudflare Tunnel 将服务暴露到外网：
+如果需要测试 Webhook 功能，可以通过 Cloudflare Tunnel 将本地服务暴露到外网：
 ```bash
 pnpx cloudflared tunnel --url http://localhost:3001
 ```
@@ -654,6 +643,8 @@ const data = await res.json();
 <br />
 <br />
 <a href="https://www.buymeacoffee.com/beilunyang" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-blue.png" alt="Buy Me A Coffee" style="width: 400px;" ></a>
-#   n e w m o e m a i l  
- #   n e w m o e m a i l  
+#   n e w m o e m a i l 
+ 
+ #   n e w m o e m a i l 
+ 
  
