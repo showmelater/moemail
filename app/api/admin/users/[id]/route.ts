@@ -242,27 +242,29 @@ export async function DELETE(
 
     // 开始事务删除用户及其相关数据
     await db.transaction(async (tx) => {
-      // 删除用户的邮箱
+      // 1. 首先处理激活码 - 将 usedByUserId 设为 null（因为外键约束是 set null）
+      if (targetUser.activationCodes.length > 0) {
+        await tx.update(activationCodes)
+          .set({ usedByUserId: null })
+          .where(eq(activationCodes.usedByUserId, id))
+      }
+
+      // 2. 删除用户的邮箱（会级联删除相关消息）
       if (targetUser.emails.length > 0) {
         await tx.delete(emails).where(eq(emails.userId, id))
       }
 
-      // 删除用户的API密钥
+      // 3. 删除用户的API密钥
       if (targetUser.apiKeys.length > 0) {
         await tx.delete(apiKeys).where(eq(apiKeys.userId, id))
       }
 
-      // 删除用户的激活码
-      if (targetUser.activationCodes.length > 0) {
-        await tx.delete(activationCodes).where(eq(activationCodes.usedByUserId, id))
-      }
-
-      // 删除用户角色关联
+      // 4. 删除用户角色关联
       if (targetUser.userRoles.length > 0) {
         await tx.delete(userRoles).where(eq(userRoles.userId, id))
       }
 
-      // 最后删除用户本身
+      // 5. 最后删除用户本身
       await tx.delete(users).where(eq(users.id, id))
     })
 
@@ -279,8 +281,27 @@ export async function DELETE(
 
   } catch (error) {
     console.error('Failed to delete user:', error)
+
+    // 提供更详细的错误信息
+    let errorMessage = "删除用户失败"
+    if (error instanceof Error) {
+      errorMessage = error.message
+
+      // 检查常见的数据库错误
+      if (error.message.includes('FOREIGN KEY constraint failed')) {
+        errorMessage = "删除失败：用户数据存在关联约束，请先清理相关数据"
+      } else if (error.message.includes('database is locked')) {
+        errorMessage = "删除失败：数据库正忙，请稍后重试"
+      } else if (error.message.includes('no such table')) {
+        errorMessage = "删除失败：数据库结构异常"
+      }
+    }
+
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "删除用户失败" },
+      {
+        error: errorMessage,
+        details: error instanceof Error ? error.message : "未知错误"
+      },
       { status: 500 }
     )
   }
