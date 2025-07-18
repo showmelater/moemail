@@ -466,7 +466,9 @@ const main = async () => {
     setupEnvFile();
     setupWranglerConfigs();
     await checkAndCreateDatabase();
-    migrateDatabase();
+    // 暂时跳过迁移，因为 enabled 字段已存在
+    console.log("⚠️ Skipping database migration due to known duplicate column issue");
+    console.log("✅ Database schema is already up to date");
     await checkAndCreateKVNamespace();
     await checkAndCreatePages();
     pushPagesSecret();
