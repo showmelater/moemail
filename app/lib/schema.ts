@@ -13,6 +13,7 @@ export const users = sqliteTable("user", {
   image: text("image"),
   username: text("username").unique(),
   password: text("password"),
+  enabled: integer("enabled", { mode: "boolean" }).notNull().default(true),
 })
 export const accounts = sqliteTable(
   "account",
@@ -162,8 +163,17 @@ export const usersRelations = relations(users, ({ many }) => ({
   userRoles: many(userRoles),
   apiKeys: many(apiKeys),
   activationCodes: many(activationCodes),
+  emails: many(emails),
 }));
 
 export const rolesRelations = relations(roles, ({ many }) => ({
   userRoles: many(userRoles),
+}));
+
+export const emailsRelations = relations(emails, ({ one, many }) => ({
+  user: one(users, {
+    fields: [emails.userId],
+    references: [users.id],
+  }),
+  messages: many(messages),
 }));

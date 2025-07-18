@@ -7,12 +7,21 @@ import { EXPIRY_OPTIONS } from "@/types/email"
 import { EMAIL_CONFIG } from "@/config"
 import { getRequestContext } from "@cloudflare/next-on-pages"
 import { getUserId } from "@/lib/apiKey"
-import { getUserRole } from "@/lib/auth"
-import { ROLES } from "@/lib/permissions"
+import { getUserRole, checkPermission } from "@/lib/auth"
+import { ROLES, PERMISSIONS } from "@/lib/permissions"
 
 export const runtime = "edge"
 
 export async function POST(request: Request) {
+  // 权限检查：学生不能创建新邮箱
+  const hasCreatePermission = await checkPermission(PERMISSIONS.CREATE_EMAIL)
+  if (!hasCreatePermission) {
+    return NextResponse.json(
+      { error: "权限不足，学生用户无法创建新邮箱" },
+      { status: 403 }
+    )
+  }
+
   const db = createDb()
   const env = getRequestContext().env
 

@@ -1,5 +1,6 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { nanoid } from "nanoid"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -16,4 +17,10 @@ export async function hashPassword(password: string): Promise<string> {
 export async function comparePassword(password: string, hashedPassword: string): Promise<boolean> {
   const hash = await hashPassword(password)
   return hash === hashedPassword
+}
+
+export async function generateRandomEmail(domain: string): Promise<string> {
+  // 生成8位随机字符串作为邮箱名
+  const randomName = nanoid(8)
+  return `${randomName}@${domain}`
 }

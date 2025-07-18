@@ -15,6 +15,8 @@ export const PERMISSIONS = {
   MANAGE_CONFIG: 'manage_config',
   MANAGE_API_KEY: 'manage_api_key',
   SET_PERMANENT_EMAIL: 'set_permanent_email',
+  MANAGE_STUDENTS: 'manage_students',
+  CREATE_EMAIL: 'create_email',
 } as const;
 
 export type Permission = typeof PERMISSIONS[keyof typeof PERMISSIONS];
@@ -25,15 +27,18 @@ export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     PERMISSIONS.MANAGE_EMAIL,
     PERMISSIONS.MANAGE_WEBHOOK,
     PERMISSIONS.MANAGE_API_KEY,
+    PERMISSIONS.CREATE_EMAIL,
   ],
   [ROLES.KNIGHT]: [
     PERMISSIONS.MANAGE_EMAIL,
     PERMISSIONS.MANAGE_WEBHOOK,
+    PERMISSIONS.CREATE_EMAIL,
   ],
   [ROLES.STUDENT]: [
     PERMISSIONS.MANAGE_EMAIL,
     PERMISSIONS.MANAGE_WEBHOOK,
     PERMISSIONS.SET_PERMANENT_EMAIL,
+    // 注意：学生没有 CREATE_EMAIL 权限
   ],
   [ROLES.CIVILIAN]: [],
 } as const;

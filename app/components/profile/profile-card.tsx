@@ -14,6 +14,7 @@ import { PERMISSIONS } from "@/lib/permissions"
 import { WebsiteConfigPanel } from "./website-config-panel"
 import { ApiKeyPanel } from "./api-key-panel"
 import { ActivationCodePanel } from "./activation-code-panel"
+import { StudentManagementPanel } from "./student-management-panel"
 
 interface ProfileCardProps {
   user: User
@@ -33,6 +34,7 @@ export function ProfileCard({ user }: ProfileCardProps) {
   const canManageWebhook = checkPermission(PERMISSIONS.MANAGE_WEBHOOK)
   const canPromote = checkPermission(PERMISSIONS.PROMOTE_USER)
   const canManageConfig = checkPermission(PERMISSIONS.MANAGE_CONFIG)
+  const canManageStudents = checkPermission(PERMISSIONS.MANAGE_STUDENTS)
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -102,6 +104,7 @@ export function ProfileCard({ user }: ProfileCardProps) {
       {canManageConfig && <WebsiteConfigPanel />}
       {canManageConfig && <EmailServiceConfig />}
       {canManageConfig && <ActivationCodePanel />}
+      {canManageStudents && <StudentManagementPanel />}
       {canPromote && <PromotePanel />}
       {canManageWebhook && <ApiKeyPanel />}
 

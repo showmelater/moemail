@@ -13,13 +13,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { EXPIRY_OPTIONS } from "@/types/email"
 import { useCopy } from "@/hooks/use-copy"
 import { useConfig } from "@/hooks/use-config"
+import { useRolePermission } from "@/hooks/use-role-permission"
+import { PERMISSIONS } from "@/lib/permissions"
 
 interface CreateDialogProps {
   onEmailCreated: () => void
 }
 
 export function CreateDialog({ onEmailCreated }: CreateDialogProps) {
-  const { config } = useConfig()  
+  const { config } = useConfig()
+  const { checkPermission } = useRolePermission()
+  const canCreateEmail = checkPermission(PERMISSIONS.CREATE_EMAIL)
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [emailName, setEmailName] = useState("")
@@ -89,6 +93,16 @@ export function CreateDialog({ onEmailCreated }: CreateDialogProps) {
       setCurrentDomain(config?.emailDomainsArray[0] ?? "")
     }
   }, [config])
+
+  // 如果没有创建邮箱权限，显示禁用状态的按钮
+  if (!canCreateEmail) {
+    return (
+      <Button disabled className="gap-2" title="学生用户无法创建新邮箱">
+        <Plus className="w-4 h-4" />
+        创建新邮箱
+      </Button>
+    )
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
