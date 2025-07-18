@@ -112,6 +112,8 @@ export async function POST(request: Request) {
       message: "账户激活成功",
       user: { id: newUser.id, username: newUser.username },
       permanentEmail: { id: newEmail.id, address: newEmail.address }
+    })
+
   } catch (error) {
     console.error('Activation failed:', error)
     return NextResponse.json(
