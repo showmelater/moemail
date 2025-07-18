@@ -8,9 +8,9 @@ export const runtime = "edge";
 
 export async function POST(request: Request) {
   try {
-    const { userId, roleName } = await request.json() as { 
-      userId: string, 
-      roleName: typeof ROLES.DUKE | typeof ROLES.KNIGHT | typeof ROLES.CIVILIAN 
+    const { userId, roleName } = await request.json() as {
+      userId: string,
+      roleName: typeof ROLES.DUKE | typeof ROLES.KNIGHT | typeof ROLES.STUDENT | typeof ROLES.CIVILIAN
     };
     if (!userId || !roleName) {
       return Response.json(
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (![ROLES.DUKE, ROLES.KNIGHT, ROLES.CIVILIAN].includes(roleName)) {
+    if (![ROLES.DUKE, ROLES.KNIGHT, ROLES.STUDENT, ROLES.CIVILIAN].includes(roleName)) {
       return Response.json(
         { error: "角色不合法" },
         { status: 400 }
