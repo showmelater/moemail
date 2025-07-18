@@ -208,9 +208,9 @@ const migrateDatabase = () => {
 
     // 检查是否是重复列错误 - 检查多个可能的错误信息来源
     const errorString = error?.toString() || '';
-    const errorMessage = error?.message || '';
-    const errorStderr = error?.stderr || '';
-    const errorStdout = error?.stdout || '';
+    const errorMessage = (error as any)?.message || '';
+    const errorStderr = (error as any)?.stderr || '';
+    const errorStdout = (error as any)?.stdout || '';
 
     const allErrorText = `${errorString} ${errorMessage} ${errorStderr} ${errorStdout}`.toLowerCase();
 
