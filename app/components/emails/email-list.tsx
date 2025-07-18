@@ -249,7 +249,7 @@ export function EmailList({ onEmailSelect, selectedEmailId }: EmailListProps) {
                   <div className="flex items-center gap-1">
                     <Mail className="h-4 w-4 text-primary/60" />
                     {email.isPermanent && (
-                      <Crown className="h-3 w-3 text-yellow-600" title="永久邮箱" />
+                      <Crown className="h-3 w-3 text-yellow-600" />
                     )}
                   </div>
                   <div className="truncate flex-1">

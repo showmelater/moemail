@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useCallback } from "react"
 import { Loader2 } from "lucide-react"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
@@ -80,7 +80,7 @@ export function MessageView({ emailId, messageId, messageType = 'received' }: Me
     fetchMessage()
   }, [emailId, messageId, messageType, toast])
 
-  const updateIframeContent = () => {
+  const updateIframeContent = useCallback(() => {
     if (viewMode === "html" && message?.html && iframeRef.current) {
       const iframe = iframeRef.current
       const doc = iframe.contentDocument || iframe.contentWindow?.document
@@ -171,12 +171,12 @@ export function MessageView({ emailId, messageId, messageType = 'received' }: Me
         }
       }
     }
-  }
+  }, [viewMode, message?.html, theme])
 
   // 监听主题变化和内容变化
   useEffect(() => {
     updateIframeContent()
-  }, [message?.html, viewMode, theme])
+  }, [message?.html, viewMode, theme, updateIframeContent])
 
   if (loading) {
     return (

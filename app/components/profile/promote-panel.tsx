@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Gem, Sword, User2, Loader2 } from "lucide-react"
+import { Gem, Sword, User2, Loader2, GraduationCap } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import { useToast } from "@/components/ui/use-toast"
@@ -17,12 +17,14 @@ import {
 const roleIcons = {
   [ROLES.DUKE]: Gem,
   [ROLES.KNIGHT]: Sword,
+  [ROLES.STUDENT]: GraduationCap,
   [ROLES.CIVILIAN]: User2,
 } as const
 
 const roleNames = {
   [ROLES.DUKE]: "公爵",
   [ROLES.KNIGHT]: "骑士",
+  [ROLES.STUDENT]: "学生",
   [ROLES.CIVILIAN]: "平民",
 } as const
 

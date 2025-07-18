@@ -1,14 +1,12 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
 import { createDb } from "@/lib/db"
-import { users, emails, activationCodes, roles } from "@/lib/schema"
+import { users, emails, activationCodes, roles, userRoles } from "@/lib/schema"
 import { eq } from "drizzle-orm"
-import { assignRoleToUser } from "@/lib/auth"
+// Role assignment is now handled inline
 import { hashPassword } from "@/lib/utils"
 import { ROLES, Role } from "@/lib/permissions"
 import { getRequestContext } from "@cloudflare/next-on-pages"
-import type { Db } from "@/lib/db"
-
 export const runtime = "edge"
 
 // 角色描述映射
@@ -18,25 +16,6 @@ const ROLE_DESCRIPTIONS: Record<Role, string> = {
   [ROLES.KNIGHT]: "骑士（高级用户）",
   [ROLES.STUDENT]: "学生（卡密激活用户）",
   [ROLES.CIVILIAN]: "平民（普通用户）",
-}
-
-// 查找或创建角色
-async function findOrCreateRole(db: Db, roleName: Role) {
-  let role = await db.query.roles.findFirst({
-    where: eq(roles.name, roleName),
-  })
-
-  if (!role) {
-    const [newRole] = await db.insert(roles)
-      .values({
-        name: roleName,
-        description: ROLE_DESCRIPTIONS[roleName],
-      })
-      .returning()
-    role = newRole
-  }
-
-  return role
 }
 
 // 卡密激活请求验证 schema
@@ -186,8 +165,27 @@ export async function POST(request: Request) {
         .returning()
 
       // 6. 分配学生角色
-      const studentRole = await findOrCreateRole(tx, ROLES.STUDENT)
-      await assignRoleToUser(tx, newUser.id, studentRole.id)
+      // 查找或创建学生角色
+      let studentRole = await tx.query.roles.findFirst({
+        where: eq(roles.name, ROLES.STUDENT),
+      })
+
+      if (!studentRole) {
+        const [newRole] = await tx.insert(roles)
+          .values({
+            name: ROLES.STUDENT,
+            description: ROLE_DESCRIPTIONS[ROLES.STUDENT],
+          })
+          .returning()
+        studentRole = newRole
+      }
+
+      // 分配角色给用户
+      await tx.insert(userRoles)
+        .values({
+          userId: newUser.id,
+          roleId: studentRole.id,
+        })
 
       // 7. 创建永久邮箱
       const now = new Date()
