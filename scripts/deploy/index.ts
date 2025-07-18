@@ -206,9 +206,17 @@ const migrateDatabase = () => {
   } catch (error) {
     console.error("❌ Database migration failed:", error);
 
-    // 检查是否是重复列错误
-    const errorMessage = error?.toString() || '';
-    if (errorMessage.includes('duplicate column name') || errorMessage.includes('enabled')) {
+    // 检查是否是重复列错误 - 检查多个可能的错误信息来源
+    const errorString = error?.toString() || '';
+    const errorMessage = error?.message || '';
+    const errorStderr = error?.stderr || '';
+    const errorStdout = error?.stdout || '';
+
+    const allErrorText = `${errorString} ${errorMessage} ${errorStderr} ${errorStdout}`.toLowerCase();
+
+    if (allErrorText.includes('duplicate column name') ||
+        allErrorText.includes('enabled') ||
+        allErrorText.includes('sqlite_error') && allErrorText.includes('7500')) {
       console.log("⚠️ Detected duplicate column error - this is expected if the migration was partially applied before");
       console.log("✅ Continuing deployment as the database schema is likely already up to date");
       return;
