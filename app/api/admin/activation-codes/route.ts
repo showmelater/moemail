@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { z } from "zod"
 import { createDb } from "@/lib/db"
-import { activationCodes, users } from "@/lib/schema"
+import { activationCodes } from "@/lib/schema"
 import { eq, and, or, like, desc, sql, lt } from "drizzle-orm"
 import { checkPermission } from "@/lib/auth"
 import { PERMISSIONS } from "@/lib/permissions"
@@ -201,7 +201,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const { count, expiryDays, note } = json
+    const { count, expiryDays } = json
     const db = createDb()
 
     // 计算过期时间

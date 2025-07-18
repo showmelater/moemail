@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useSession } from "next-auth/react"
 import { CreateDialog } from "./create-dialog"
 import { Mail, RefreshCw, Trash2, Star, Crown } from "lucide-react"
@@ -62,7 +62,7 @@ export function EmailList({ onEmailSelect, selectedEmailId }: EmailListProps) {
   const canSetPermanentEmail = checkPermission(PERMISSIONS.SET_PERMANENT_EMAIL)
   const hasPermanentEmail = emails.some(email => email.isPermanent)
 
-  const fetchEmails = async (cursor?: string) => {
+  const fetchEmails = useCallback(async (cursor?: string) => {
     try {
       const url = new URL("/api/emails", window.location.origin)
       if (cursor) {
@@ -100,7 +100,7 @@ export function EmailList({ onEmailSelect, selectedEmailId }: EmailListProps) {
       setRefreshing(false)
       setLoadingMore(false)
     }
-  }
+  }, [emails])
 
   const handleRefresh = async () => {
     setRefreshing(true)

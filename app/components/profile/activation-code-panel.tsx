@@ -3,8 +3,8 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Ticket, Plus, Search, Filter, Loader2, Eye, Trash2, ToggleLeft, ToggleRight } from "lucide-react"
-import { useState, useEffect } from "react"
+import { Ticket, Plus, Search, Loader2, ToggleLeft, ToggleRight } from "lucide-react"
+import { useState, useEffect, useCallback } from "react"
 import { useToast } from "@/components/ui/use-toast"
 import {
   Select,
@@ -75,7 +75,7 @@ export function ActivationCodePanel() {
     fetchCodes()
   }, [searchText, statusFilter])
 
-  const fetchCodes = async () => {
+  const fetchCodes = useCallback(async () => {
     setLoading(true)
     try {
       const params = new URLSearchParams()
@@ -97,7 +97,7 @@ export function ActivationCodePanel() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [searchText, statusFilter])
 
   const handleGenerate = async () => {
     const count = parseInt(generateCount)
@@ -125,7 +125,7 @@ export function ActivationCodePanel() {
 
       if (!response.ok) throw new Error('生成卡密失败')
 
-      const data = await response.json()
+      await response.json()
       toast({
         title: "生成成功",
         description: `成功生成 ${count} 个卡密`,
