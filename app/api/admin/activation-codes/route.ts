@@ -113,15 +113,16 @@ export async function GET(request: Request) {
     
     if (cursor) {
       const { timestamp, id } = decodeCursor(cursor)
-      queryConditions.push(
-        or(
-          lt(activationCodes.createdAt, new Date(timestamp)),
-          and(
-            eq(activationCodes.createdAt, new Date(timestamp)),
-            lt(activationCodes.id, id)
-          )
+      const cursorCondition = or(
+        lt(activationCodes.createdAt, new Date(timestamp)),
+        and(
+          eq(activationCodes.createdAt, new Date(timestamp)),
+          lt(activationCodes.id, id)
         )
       )
+      if (cursorCondition) {
+        queryConditions.push(cursorCondition)
+      }
     }
 
     // 查询卡密列表，包含使用者信息

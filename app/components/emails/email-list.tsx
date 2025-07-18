@@ -122,7 +122,7 @@ export function EmailList({ onEmailSelect, selectedEmailId }: EmailListProps) {
 
   useEffect(() => {
     if (session) fetchEmails()
-  }, [session])
+  }, [session, fetchEmails])
 
   const handleDelete = async (email: Email) => {
     try {

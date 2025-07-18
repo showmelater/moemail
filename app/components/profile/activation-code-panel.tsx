@@ -73,7 +73,7 @@ export function ActivationCodePanel() {
 
   useEffect(() => {
     fetchCodes()
-  }, [searchText, statusFilter])
+  }, [searchText, statusFilter, fetchCodes])
 
   const fetchCodes = useCallback(async () => {
     setLoading(true)
@@ -97,7 +97,7 @@ export function ActivationCodePanel() {
     } finally {
       setLoading(false)
     }
-  }, [searchText, statusFilter])
+  }, [searchText, statusFilter, toast])
 
   const handleGenerate = async () => {
     const count = parseInt(generateCount)
