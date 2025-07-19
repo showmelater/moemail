@@ -2,6 +2,8 @@ import { callWebhook } from "@/lib/webhook"
 import { WEBHOOK_CONFIG } from "@/config"
 import { z } from "zod"
 import { EmailMessage } from "@/lib/webhook"
+import { auth, checkPermission } from "@/lib/auth"
+import { PERMISSIONS } from "@/lib/permissions"
 
 export const runtime = "edge"
 
@@ -11,6 +13,20 @@ const testSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    const session = await auth()
+    if (!session?.user?.id) {
+      return Response.json({ error: "未授权" }, { status: 401 })
+    }
+
+    // 权限检查：必须拥有 MANAGE_WEBHOOK 权限
+    const hasPermission = await checkPermission(PERMISSIONS.MANAGE_WEBHOOK)
+    if (!hasPermission) {
+      return Response.json(
+        { error: "权限不足，您没有管理 Webhook 的权限" },
+        { status: 403 }
+      )
+    }
+
     const body = await request.json()
     const { url } = testSchema.parse(body)
 
